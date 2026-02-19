@@ -1,1 +1,1 @@
-# Shrimpy.Terminal
+# Shrimpy.Terminal Auto.Updater
