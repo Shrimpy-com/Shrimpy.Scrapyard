@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦐 SHRIMP TERMINAL 🦐</title>
+<link rel="icon" type="image/x-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTU538-Btg1tPn3XDx_L-v7wiPyE8hS-qUd_w&s">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background-color: #000000;
+        color: #ff8800;
+        font-family: 'Courier New', monospace;
+        overflow: hidden;
+        height: 100vh;
+        position: relative;
+    }
+
+    #particles-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    #boot-screen {
+        padding: 20px;
+        height: 100vh;
+        overflow-y: auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    #skip-boot {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #ff8800;
+        color: #000;
+        border: 2px solid #ffaa00;
+        padding: 10px 20px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        cursor: pointer;
+        z-index: 1000;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    #skip-boot:hover {
+        background-color: #ffaa00;
+        box-shadow: 0 0 20px #ff8800;
+    }
+
+    #terminal {
+        display: none;
+        padding: 20px;
+        height: 100vh;
+        overflow-y: auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .boot-line {
+        opacity: 0;
+        animation: fadeIn 0.3s forwards;
+        margin: 3px 0;
+        text-shadow: 0 0 5px #ff8800;
+    }
+
+    @keyframes fadeIn {
+        to { opacity: 1; }
+    }
+
+    .fade-in-content {
+        opacity: 0;
+        animation: contentFadeIn 1s forwards;
+    }
+
+    @keyframes contentFadeIn {
+        to { opacity: 1; }
+    }
+
+    .blink {
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+    }
+
+    .header {
+        border: 2px solid #ff8800;
+        padding: 15px;
+        margin: 20px 0;
+        background-color: #1a0a00;
+        box-shadow: 0 0 20px rgba(255, 136, 0, 0.3);
+    }
+
+    .section {
+        margin: 20px 0;
+        padding: 15px;
+        border-left: 3px solid #ff8800;
+        background-color: #0a0500;
+    }
+
+    .section-title {
+        color: #ffaa00;
+        font-size: 18px;
+        margin-bottom: 10px;
+        text-shadow: 0 0 10px #ff8800;
+    }
+
+    a {
+        color: #ff8800;
+        text-decoration: none;
+        display: block;
+        padding: 8px 0;
+        transition: all 0.3s;
+        border-left: 3px solid transparent;
+        padding-left: 10px;
+    }
+
+    a:hover {
+        color: #ffcc00;
+        border-left: 3px solid #ffcc00;
+        background-color: #1a0a00;
+        text-shadow: 0 0 8px #ffcc00;
+        padding-left: 20px;
+    }
+
+    .prompt {
+        color: #ffaa00;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    li::before {
+        content: "▸ ";
+        color: #ff6600;
+    }
+
+    .ascii-art {
+        color: #ff6600;
+        line-height: 1.2;
+        margin: 20px 0;
+        text-shadow: 0 0 10px #ff8800;
+    }
+
+    .status-ok {
+        color: #00ff00;
+    }
+
+    .status-warn {
+        color: #ffaa00;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #000000;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #ff8800;
+        border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #ffaa00;
+    }
+
+    #command-section {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #0a0500;
+        border-top: 2px solid #ff8800;
+        padding: 15px 20px;
+        z-index: 2;
+    }
+
+    #command-input {
+        width: 100%;
+        background-color: #000;
+        border: 2px solid #ff8800;
+        color: #ff8800;
+        padding: 10px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        outline: none;
+    }
+
+    #command-input:focus {
+        border-color: #ffaa00;
+        box-shadow: 0 0 10px rgba(255, 136, 0, 0.5);
+    }
+
+    #output-area {
+        margin-bottom: 80px;
+    }
+
+    .command-output {
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #0a0500;
+        border-left: 3px solid #ff8800;
+    }
+
+    .command-line {
+        color: #ffaa00;
+        margin-bottom: 5px;
+    }
+
+    .settings-panel {
+        background-color: #1a0a00;
+        border: 2px solid #ff8800;
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .settings-option {
+        margin: 15px 0;
+    }
+
+    .settings-option label {
+        display: block;
+        color: #ffaa00;
+        margin-bottom: 5px;
+    }
+
+    .settings-option select,
+    .settings-option button,
+    .settings-option input {
+        background-color: #000;
+        color: #ff8800;
+        border: 2px solid #ff8800;
+        padding: 8px 15px;
+        font-family: 'Courier New', monospace;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 5px;
+    }
+
+    .settings-option button:hover,
+    .settings-option select:hover {
+        background-color: #ff8800;
+        color: #000;
+    }
+
+    .ai-panel {
+        background-color: #1a0a00;
+        border: 2px solid #ff8800;
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .ai-chat-history {
+        max-height: 300px;
+        overflow-y: auto;
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #0a0500;
+        border: 1px solid #ff8800;
+    }
+
+    .ai-message {
+        margin: 10px 0;
+        padding: 8px;
+        border-left: 3px solid #ff8800;
+    }
+
+    .ai-user {
+        color: #ffaa00;
+    }
+
+    .ai-bot {
+        color: #00ff88;
+    }
+
+    .generated-image {
+        max-width: 100%;
+        margin: 10px 0;
+        border: 2px solid #ff8800;
+    }
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+
+<button id="skip-boot">⚡ SKIP BOOT ⚡</button>
+
+<div id="boot-screen"></div>
+
+<div id="terminal">
+    <div class="header fade-in-content">
+        <pre class="ascii-art">
+ ███████╗██╗  ██╗██████╗ ██╗███╗   ███╗██████╗ ██╗   ██╗   ███████╗
+ ██╔════╝██║  ██║██╔══██╗██║████╗ ████║██╔══██╗╚██╗ ██╔╝   ██╔════╝
+ ███████╗███████║██████╔╝██║██╔████╔██║██████╔╝ ╚████╔╝    ███████╗
+ ╚════██║██╔══██║██╔══██╗██║██║╚██╔╝██║██╔═══╝   ╚██╔╝     ╚════██║
+ ███████║██║  ██║██║  ██║██║██║ ╚═╝ ██║██║        ██║      ███████║
+ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝     ╚═╝╚═╝        ╚═╝      ╚══════╝
+                                                                     
+  ██████╗ ██████╗ ███╗   ██╗███████╗ ██████╗ ██╗     ███████╗      
+ ██╔════╝██╔═══██╗████╗  ██║██╔════╝██╔═══██╗██║     ██╔════╝      
+ ██║     ██║   ██║██╔██╗ ██║███████╗██║   ██║██║     █████╗        
+ ██║     ██║   ██║██║╚██╗██║╚════██║██║   ██║██║     ██╔══╝        
+ ╚██████╗╚██████╔╝██║ ╚████║███████║╚██████╔╝███████╗███████╗      
+  ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚══════╝╚══════╝      
+        </pre>
+        <div style="text-align: center; margin-top: 10px;">
+            🦐🦐🦐 <span class="status-ok">SYSTEM READY</span> 🦐🦐🦐<br>
+            <span style="font-size: 12px; color: #ffaa00;">Made by Shrimpy</span>
+        </div>
+    </div>
+
+    <div id="output-area">
+        <div class="section fade-in-content">
+            <div class="section-title">💡 PETEZAH LITE LINKS ⚡</div>
+            <ul>
+                <li><a href="https://sites.google.com/view/p3tezah" target="_blank">🌐 https://sites.google.com/view/p3tezah</a></li>
+                <li><a href="https://sites.google.com/view/defeducation" target="_blank">📚 https://sites.google.com/view/defeducation</a></li>
+                <li><a href="https://sites.google.com/view/67isdead" target="_blank">💀 https://sites.google.com/view/67isdead</a></li>
+                <li><a href="https://sites.google.com/view/hellothereio" target="_blank">👋 https://sites.google.com/view/hellothereio</a></li>
+                <li><a href="https://sites.google.com/view/areyouhavingfun" target="_blank">🎉 https://sites.google.com/view/areyouhavingfun</a></li>
+                <li><a href="https://sites.google.com/view/edusite52" target="_blank">📖 https://sites.google.com/view/edusite52</a></li>
+                <li><a href="https://sites.google.com/view/pizzalight" target="_blank">🍕 https://sites.google.com/view/pizzalight</a></li>
+                <li><a href="https://sites.google.com/view/yeayoucantblockme" target="_blank">🚫 https://sites.google.com/view/yeayoucantblockme</a></li>
+            </ul>
+        </div>
+
+        <div class="section fade-in-content">
+            <div class="section-title">🚫 UNBLOCKABLE MODULES 🛡️</div>
+            <ul>
+                <li><a href="https://script.google.com/macros/s/AKfycbwpcPUibOlOB1ZjijKuYDOcyZ2l6QphSHTPzxoAjbloaRLfUGRA56JPXYu54dMRy_aTDg/exec" target="_blank">🔧 Unblockable Module 1 🛡️</a></li>
+                <li><a href="https://script.google.com/macros/s/AKfycbwHRqZc_niJ7iWkwufdt6U1hn4-gVZg7pjSMnkacnb1wfjuo5Nt_0dLxiPJg8b_GRjsbQ/exec" target="_blank">🔧 Unblockable Module 2 🛡️</a></li>
+                <li><a href="https://script.google.com/macros/s/AKfycbz_cc5dDckVM0Fkm1xHqgJHPyKvuCJ6aRpnaB5Pms5TqbNqjIr_RzOBx09zyHIxFM-NGw/exec" target="_blank">🔧 Unblockable Module 3 🛡️</a></li>
+                <li><a href="https://script.google.com/macros/s/AKfycbwxGpPscoFJ-wR6i51TntAklR-ztccVk-VqRchqY0zTJfEtixyZVnCcFzxPTyZGmqhHww/exec" target="_blank">🔧 Unblockable Module 4 🛡️</a></li>
+                <li><a href="https://script.google.com/macros/s/AKfycbylysINHc7tVEZE3XJZKklP65tfKlGyUTqi_YhbSMEM_yGqaQYK77s0X0WWfQcM_qzpSQ/exec" target="_blank">🔧 Unblockable Module 5 🛡️</a></li>
+                <li><a href="https://script.google.com/macros/s/AKfycbw_lkH51iNEN6QI9kSlAtxw6H1kWnDNWu7JKBdqFK9Y32pXZ0fRaAkAmKIsc3eXbz6DGw/exec" target="_blank">🔧 Unblockable Module 6 🛡️</a></li>
+                <li><a href="https://script.google.com/macros/s/AKfycbzCs7NtzwmcjAcpGe4TQu_RAVeMDBL6zUSDbZxs2ze8-dLfwRh4DxxhLdxp8t5hD8h04A/exec" target="_blank">🔧 Unblockable Module 7 🛡️</a></li>
+                <li><a href="https://script.google.com/macros/s/AKfycbyrLyfsTUoGzjlh3Tm2MZyONBN6_nLs1uD-nYVlzdTqDwDBKl7s-cfl6LvaHGNSV8fpZg/exec" target="_blank">🔧 Unblockable Module 8 🛡️</a></li>
+                <li><a href="http://script.google.com/macros/s/AKfycbzmdsUj-eNPnb2l4Lcj8xbCvL4QLXOYmKh5m9DOdetNBO2uCsYK_LtI1PHQhH4n7Er1LQ/exec" target="_blank">🔧 Unblockable Module 9 🛡️</a></li>
+                <li><a href="https://script.google.com/macros/s/AKfycbyZbeN77xlGgmRQ2-Z2vAepcu5rtVsZe_9IkR7faG1CLjh01hpIp5eZRxxHIU1d6qd0zw/exec" target="_blank">🧮 Backup Module (Diesmos) 🛡️</a></li>
+            </ul>
+        </div>
+
+        <div class="section fade-in-content">
+            <div class="section-title">🚀 SPACE LINKS 🌌</div>
+            <ul>
+                <li><a href="https://spacing.gorich.hk/" target="_blank">🛸 https://spacing.gorich.hk/</a></li>
+                <li><a href="https://spacing.night.int.yt/" target="_blank">🌙 https://spacing.night.int.yt/</a></li>
+                <li><a href="https://spacing.is-a.software.cdn.cloudflare.net/" target="_blank">☁️ https://spacing.is-a.software.cdn.cloudflare.net/</a></li>
+                <li><a href="https://spacing-is-not.cool.cdn.cloudflare.net/" target="_blank">❄️ https://spacing-is-not.cool.cdn.cloudflare.net/</a></li>
+            </ul>
+        </div>
+
+        <div class="section fade-in-content">
+            <div class="section-title">🌙 DAYDREAM X LINKS 💭</div>
+            <ul>
+                <li><a href="https://dreams.gorich.hk/" target="_blank">😴 https://dreams.gorich.hk/</a></li>
+                <li><a href="https://dreams.night.int.yt/" target="_blank">🌃 https://dreams.night.int.yt/</a></li>
+                <li><a href="https://dreams.is-a.software.cdn.cloudflare.net/" target="_blank">💻 https://dreams.is-a.software.cdn.cloudflare.net/</a></li>
+                <li><a href="https://dreams.is-not.cool.cdn.cloudflare.net/" target="_blank">🧊 https://dreams.is-not.cool.cdn.cloudflare.net/</a></li>
+                <li><a href="https://learn.about.eclipsecastello.com/" target="_blank">🌑 https://learn.about.eclipsecastello.com/</a></li>
+            </ul>
+        </div>
+
+        <div class="section fade-in-content">
+            <div class="section-title">🏠 MAIN HUBS 🎯</div>
+            <ul>
+                <li><a href="https://sites.google.com/view/kamezonev2/kamzone" target="_blank">🎮 https://sites.google.com/view/kamezonev2/kamzone</a></li>
+                <li><a href="https://sites.google.com/view/kamzone-arcade/kamzone" target="_blank">🕹️ https://sites.google.com/view/kamzone-arcade/kamzone</a></li>
+            </ul>
+        </div>
+
+        <div class="section fade-in-content">
+            <div class="section-title">🎬 MOVIE LINKS 🍿</div>
+            <ul>
+                <li><a href="https://spenflix.com" target="_blank">🎥 https://spenflix.com</a></li>
+                <li><a href="https://fmovies.to" target="_blank">🎥 https://fmovies.to</a></li>
+                <li><a href="https://bitcoinex.com" target="_blank">🎥 https://bitcoinex.com</a></li>
+                <li><a href="https://primex.to" target="_blank">🎥 https://primex.to</a></li>
+                <li><a href="https://corsflix.com" target="_blank">🎥 https://corsflix.com</a></li>
+                <li><a href="https://rive.to" target="_blank">🎥 https://rive.to</a></li>
+                <li><a href="https://cinegram.to" target="_blank">🎥 https://cinegram.to</a></li>
+                <li><a href="https://shuttletv.net" target="_blank">🎥 https://shuttletv.net</a></li>
+                <li><a href="https://1shows.to" target="_blank">🎥 https://1shows.to</a></li>
+                <li><a href="https://cinevibe.to" target="_blank">🎥 https://cinevibe.to</a></li>
+                <li><a href="https://popcornmovies.to" target="_blank">🎥 https://popcornmovies.to</a></li>
+                <li><a href="https://movish.to" target="_blank">🎥 https://movish.to</a></li>
+                <li><a href="https://cinetaro.com" target="_blank">🎥 https://cinetaro.com</a></li>
+                <li><a href="https://smashystream.com" target="_blank">🎥 https://smashystream.com</a></li>
+                <li><a href="https://tvids.tv" target="_blank">🎥 https://tvids.tv</a></li>
+                <li><a href="https://tvids.me" target="_blank">🎥 https://tvids.me</a></li>
+                <li><a href="https://azmovies.net" target="_blank">🎥 https://azmovies.net</a></li>
+                <li><a href="https://bflix.to" target="_blank">🎥 https://bflix.to</a></li>
+                <li><a href="https://streamm4u.com.co" target="_blank">🎥 https://streamm4u.com.co</a></li>
+                <li><a href="https://m4uhd.tv" target="_blank">🎥 https://m4uhd.tv</a></li>
+                <li><a href="https://m4ufree.se" target="_blank">🎥 https://m4ufree.se</a></li>
+                <li><a href="https://supernova.to" target="_blank">🎥 https://supernova.to</a></li>
+                <li><a href="https://goojara.ch" target="_blank">🎥 https://goojara.ch</a></li>
+                <li><a href="https://projectfreetv.biz" target="_blank">🎥 https://projectfreetv.biz</a></li>
+                <li><a href="https://hdtoday.tv" target="_blank">🎥 https://hdtoday.tv</a></li>
+                <li><a href="https://ee3.me" target="_blank">🎥 https://ee3.me</a></li>
+            </ul>
+        </div>
+
+        <div class="header fade-in-content" style="margin-top: 30px;">
+            <div style="text-align: center;">
+                ⚡⚡⚡ <span class="prompt">Last Updated:</span> February 15, 2026 ⚡⚡⚡<br>
+                🔥 <span class="status-ok">ALL SYSTEMS OPERATIONAL</span> 🔥
+            </div>
+        </div>
+    </div>
+
+    <div id="command-section">
+        <div style="margin-bottom: 5px; color: #ffaa00;">chronos@chromeos:~$ <span class="blink">█</span></div>
+        <input type="text" id="command-input" placeholder="Type 'help' for available commands..." autocomplete="off">
+    </div>
+</div>
+
+<script>
+    const DEEPAI_API_KEY = 'b31d4348-a152-4039-a0ec-d65473fa961c';
+
+    const bootMessages = [
+        '🦐🦐🦐 INITIALIZING SHRIMP TERMINAL 🦐🦐🦐',
+        '',
+        '⚡ POST: Power-On Self Test initiating...',
+        '⚡ Chrome OS BIOS Version 115.0.5790 - Build 20260215',
+        '⚡ Copyright (C) 2026 Shrimpy Systems Inc.',
+        '',
+        '💾 Memory Test: 8192MB OK',
+        '💾 Testing RAM modules...',
+        '  ├─ Module 0: 4096MB <span class="status-ok">[PASSED]</span>',
+        '  └─ Module 1: 4096MB <span class="status-ok">[PASSED]</span>',
+        '',
+        '🔍 Detecting hardware...',
+        '  ├─ CPU: Intel Celeron N4020 @ 2.8GHz [2 cores] ✓',
+        '  ├─ GPU: Intel UHD Graphics 600 ✓',
+        '  ├─ Storage: 64GB eMMC ✓',
+        '  └─ Network: Intel Wireless-AC 9560 ✓',
+        '',
+        '⚙️ Loading boot sector from /dev/mmcblk0...',
+        '⚙️ Reading partition table...',
+        '⚙️ Boot signature verified <span class="status-ok">[0xAA55]</span>',
+        '',
+        '🐧 Loading Chrome OS kernel 115.0.5790...',
+        '🐧 Decompressing kernel image...',
+        '🐧 Setting up kernel parameters...',
+        '🐧 Initializing hardware abstraction layer...',
+        '🐧 Starting init process <span class="status-ok">[PID 1]</span>',
+        '',
+        '📡 Initializing device drivers...',
+        '  ├─ mmcblk0: SanDisk eMMC <span class="status-ok">[OK]</span>',
+        '  ├─ wlan0: Intel Wireless-AC 9560 <span class="status-ok">[OK]</span>',
+        '  ├─ bluetooth: Intel BT 5.1 <span class="status-ok">[OK]</span>',
+        '  ├─ usb-controller: xHCI Host <span class="status-ok">[OK]</span>',
+        '  └─ audio: Realtek ALC5682 <span class="status-ok">[OK]</span>',
+        '',
+        '🌐 Network Interface Status:',
+        '  ├─ Scanning for networks...',
+        '  ├─ wlan0: Link detected',
+        '  ├─ wlan0: Speed 866Mb/s',
+        '  ├─ wlan0: Requesting DHCP lease...',
+        '  ├─ wlan0: Assigned 192.168.1.42/24',
+        '  ├─ wlan0: Gateway 192.168.1.1',
+        '  ├─ wlan0: <span class="status-ok">CONNECTED ✓</span>',
+        '  ├─ Connection Stability: <span class="status-ok">EXCELLENT [98%] 📶</span>',
+        '  ├─ Latency: <span class="status-ok">12ms ⚡</span>',
+        '  ├─ Packet Loss: <span class="status-ok">0.0% ✓</span>',
+        '  └─ vpn0: Establishing secure tunnel...',
+        '  └─ vpn0: AES-256-GCM encryption <span class="status-ok">ACTIVE 🔐</span>',
+        '',
+        '💾 Mounting filesystems...',
+        '  ├─ Checking /dev/mmcblk0p1...',
+        '  ├─ Chrome OS fsck: 0 errors found',
+        '  ├─ /dev/mmcblk0p1 on / type ext4 <span class="status-ok">[MOUNTED]</span> 💿',
+        '  ├─ /dev/mmcblk0p2 on /home/chronos type ext4 <span class="status-ok">[MOUNTED]</span> 💿',
+        '  ├─ /dev/mmcblk0p3 on /var type ext4 <span class="status-ok">[MOUNTED]</span> 💿',
+        '  └─ tmpfs on /tmp type tmpfs <span class="status-ok">[MOUNTED]</span> 💿',
+        '',
+        '🔐 Security Layer Initialization...',
+        '  ├─ Loading Chrome OS security policies...',
+        '  ├─ Chrome OS Security: <span class="status-ok">ENFORCING MODE</span>',
+        '  ├─ Firewall: Loading iptables rules...',
+        '  ├─ Firewall: 47 rules loaded',
+        '  ├─ Firewall: <span class="status-ok">ACTIVE 🛡️</span>',
+        '  ├─ SSH: Generating host keys...',
+        '  ├─ SSH: RSA key fingerprint generated',
+        '  ├─ SSH: <span class="status-ok">READY on port 22 🔑</span>',
+        '  ├─ Encryption: Initializing Chrome OS encryption...',
+        '  ├─ Encryption: TPM modules loaded',
+        '  └─ Encryption: <span class="status-ok">ENABLED 🔒</span>',
+        '',
+        '⏰ Synchronizing system time...',
+        '  ├─ Contacting NTP servers...',
+        '  ├─ time.google.com: 142ms latency',
+        '  ├─ time.cloudflare.com: 89ms latency',
+        '  ├─ pool.ntp.org: 156ms latency',
+        '  └─ System time: <span class="status-ok">2026-02-15 14:23:47 UTC ✓</span>',
+        '',
+        '🚀 Starting System Services...',
+        '  ├─ Chrome OS: Starting service manager...',
+        '  ├─ [1/24] Starting udev device manager...',
+        '  ├─ [2/24] Starting D-Bus system bus...',
+        '  ├─ [3/24] Starting Chrome Network Manager...',
+        '  ├─ [4/24] Starting Nginx web server... <span class="status-ok">[STARTED]</span> 🌐',
+        '  ├─ [5/24] Starting PostgreSQL database... <span class="status-ok">[STARTED]</span> 💽',
+        '  ├─ [6/24] Starting Redis cache server... <span class="status-ok">[STARTED]</span> ⚡',
+        '  ├─ [7/24] Starting Docker daemon... <span class="status-ok">[STARTED]</span> 🐳',
+        '  ├─ [8/24] Starting API Gateway... <span class="status-ok">[STARTED]</span> 🚪',
+        '  ├─ [9/24] Starting CDN edge nodes... <span class="status-ok">[STARTED]</span> 🌍',
+        '  ├─ [10/24] Starting load balancer... <span class="status-ok">[STARTED]</span> ⚖️',
+        '  └─ All critical services online ✓',
+        '',
+        '📊 System Resource Monitor:',
+        '  ├─ CPU Usage: 8.2% [2 cores @ 2.8GHz] 🔥',
+        '  ├─ RAM Usage: 2.1GB / 8GB available 💪',
+        '  ├─ SWAP: 0GB / 4GB used 💾',
+        '  ├─ Disk I/O: Read 12MB/s | Write 8MB/s 📈',
+        '  ├─ Network: RX 45Mb/s | TX 22Mb/s 📡',
+        '  ├─ Temperature: CPU 45°C 🌡️',
+        '  └─ Battery: 87% [Charging] 🔋',
+        '',
+        '🎮 Loading Application Modules...',
+        '  ├─ Scanning /opt/shrimpy/modules...',
+        '  ├─ Found 6 module groups',
+        '  ├─ Validating checksums...',
+        '  ├─ Initializing Petezah Lite Links... <span class="status-ok">[LOADED]</span> 💡',
+        '  ├─ Initializing Unblockable Modules...',
+        '  │  ├─ Module 1: Encryption verified ✓',
+        '  │  ├─ Module 2: Encryption verified ✓',
+        '  │  ├─ Module 3: Encryption verified ✓',
+        '  │  ├─ Module 4: Encryption verified ✓',
+        '  │  ├─ Module 5: Encryption verified ✓',
+        '  │  ├─ Module 6: Encryption verified ✓',
+        '  │  ├─ Module 7: Encryption verified ✓',
+        '  │  ├─ Module 8: Encryption verified ✓',
+        '  │  ├─ Module 9: Encryption verified ✓',
+        '  │  └─ Backup Module: Encryption verified ✓',
+        '  ├─ Unblockable Modules <span class="status-ok">[LOADED]</span> 🛡️',
+        '  ├─ Initializing Space Links... <span class="status-ok">[LOADED]</span> 🚀',
+        '  ├─ Initializing Daydream X... <span class="status-ok">[LOADED]</span> 🌙',
+        '  ├─ Initializing Main Hubs...',
+        '  │  ├─ Kamzone V2 hub online ✓',
+        '  │  └─ Kamzone Arcade online ✓',
+        '  ├─ Main Hubs <span class="status-ok">[LOADED]</span> 🏠',
+        '  ├─ Initializing Movie Links...',
+        '  │  ├─ Streaming servers verified ✓',
+        '  │  └─ 27 movie sites loaded ✓',
+        '  └─ Movie Links <span class="status-ok">[LOADED]</span> 🎬',
+        '',
+        '🤖 Initializing AI Systems...',
+        '  ├─ DeepAI API: <span class="status-ok">CONNECTED ✓</span>',
+        '  ├─ Chat Engine: <span class="status-ok">READY ✓</span>',
+        '  └─ Image Generator: <span class="status-ok">READY ✓</span>',
+        '',
+        '🔒 Running security diagnostics...',
+        '  ├─ Port scan: No unauthorized listeners',
+        '  ├─ File integrity: All checksums valid',
+        '  ├─ Intrusion detection: No threats found',
+        '  └─ Security status: <span class="status-ok">ALL CLEAR ✓</span>',
+        '',
+        '✨✨✨ BOOT SEQUENCE COMPLETE ✨✨✨',
+        '',
+        '🦐 SYSTEM STATUS: <span class="status-ok">FULLY OPERATIONAL</span> 🦐',
+        '⚡ PERFORMANCE: <span class="status-ok">OPTIMAL</span> ⚡',
+        '🛡️ SECURITY: <span class="status-ok">MAXIMUM</span> 🛡️',
+        '💡 MODULES: <span class="status-ok">6 GROUPS LOADED</span> 💡',
+        '🌐 NETWORK: <span class="status-ok">CONNECTED</span> 🌐',
+        '🤖 AI SYSTEMS: <span class="status-ok">ONLINE</span> 🤖',
+        '🖥️ PLATFORM: <span class="status-ok">CHROME OS</span> 🖥️',
+        '',
+        '🎯🎯🎯 LAUNCHING SHRIMP TERMINAL INTERFACE 🎯🎯🎯',
+        ''
+    ];
+
+    const bootScreen = document.getElementById('boot-screen');
+    const terminal = document.getElementById('terminal');
+    const skipButton = document.getElementById('skip-boot');
+    const commandInput = document.getElementById('command-input');
+    const outputArea = document.getElementById('output-area');
+
+    let currentLine = 0;
+    let bootTimeout = null;
+    let commandHistory = [];
+    let particleEffect = 'matrix';
+    let currentTheme = 'orange';
+    let aiChatHistory = [];
+
+    const themes = {
+        orange: { primary: '#ff8800', secondary: '#ffaa00', bg: '#000000' },
+        green: { primary: '#00ff00', secondary: '#00ff88', bg: '#000000' },
+        blue: { primary: '#00aaff', secondary: '#00ccff', bg: '#000000' },
+        red: { primary: '#ff0000', secondary: '#ff6666', bg: '#000000' },
+        purple: { primary: '#aa00ff', secondary: '#cc66ff', bg: '#000000' },
+        cyan: { primary: '#00ffff', secondary: '#66ffff', bg: '#000000' },
+        yellow: { primary: '#ffff00', secondary: '#ffff66', bg: '#000000' },
+        pink: { primary: '#ff00ff', secondary: '#ff66ff', bg: '#000000' },
+        lime: { primary: '#00ff00', secondary: '#88ff00', bg: '#000000' },
+        white: { primary: '#ffffff', secondary: '#cccccc', bg: '#000000' }
+    };
+
+    function applyTheme(theme) {
+        const colors = themes[theme];
+        document.documentElement.style.setProperty('--primary-color', colors.primary);
+        document.body.style.color = colors.primary;
+        
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body, #command-input, .boot-line, a, .section-title, .prompt, .ascii-art {
+                color: ${colors.primary} !important;
+            }
+            a:hover {
+                color: ${colors.secondary} !important;
+            }
+            .header, .section, #command-input, #command-section {
+                border-color: ${colors.primary} !important;
+            }
+        `;
+        document.head.appendChild(style);
+        currentTheme = theme;
+    }
+
+    function getLineDelay(message) {
+        if (message === '') return 50;
+        if (message.includes('Memory Test') || message.includes('Testing RAM')) return 400;
+        if (message.includes('Module 0') || message.includes('Module 1') || 
+            message.includes('Module 2') || message.includes('Module 3')) return 300;
+        if (message.includes('Detecting hardware')) return 350;
+        if (message.includes('CPU:') || message.includes('GPU:') || 
+            message.includes('Storage:')) return 250;
+        if (message.includes('Loading boot sector') || message.includes('Reading partition')) return 450;
+        if (message.includes('Loading Linux kernel')) return 500;
+        if (message.includes('Decompressing kernel')) return 600;
+        if (message.includes('Setting up kernel') || message.includes('hardware abstraction')) return 400;
+        if (message.includes('Initializing device drivers')) return 350;
+        if (message.includes('nvme0n1:') || message.includes('eth0:') || 
+            message.includes('wlan0:') || message.includes('usb-controller:') || 
+            message.includes('audio:')) return 250;
+        if (message.includes('Scanning for networks')) return 500;
+        if (message.includes('Link detected') || message.includes('Speed 10000Mb')) return 200;
+        if (message.includes('Requesting DHCP')) return 550;
+        if (message.includes('Assigned 192.168')) return 300;
+        if (message.includes('Connection Stability') || message.includes('Latency') || 
+            message.includes('Packet Loss')) return 300;
+        if (message.includes('Establishing secure tunnel')) return 600;
+        if (message.includes('AES-256-GCM')) return 400;
+        if (message.includes('Checking /dev/')) return 450;
+        if (message.includes('fsck:')) return 500;
+        if (message.includes('[MOUNTED]')) return 300;
+        if (message.includes('Loading SELinux')) return 400;
+        if (message.includes('Loading iptables')) return 450;
+        if (message.includes('Generating host keys')) return 550;
+        if (message.includes('Initializing LUKS') || message.includes('dm-crypt')) return 500;
+        if (message.includes('Contacting NTP')) return 400;
+        if (message.includes('time.google.com') || message.includes('time.cloudflare') || 
+            message.includes('pool.ntp.org')) return 350;
+        if (message.includes('Starting udev') || message.includes('Starting D-Bus') || 
+            message.includes('Starting Network Manager')) return 200;
+        if (message.includes('Starting Nginx') || message.includes('Starting PostgreSQL') || 
+            message.includes('Starting Redis') || message.includes('Starting Docker')) return 400;
+        if (message.includes('Starting API Gateway') || message.includes('Starting CDN') || 
+            message.includes('Starting load balancer')) return 350;
+        if (message.includes('Scanning /opt/shrimpy')) return 300;
+        if (message.includes('Found 5 module')) return 250;
+        if (message.includes('Validating checksums')) return 450;
+        if (message.includes('Initializing Petezah Lite') || 
+            message.includes('Initializing Unblockable') || 
+            message.includes('Initializing Space') || 
+            message.includes('Initializing Daydream') || 
+            message.includes('Initializing Main Hubs')) return 400;
+        if (message.includes('Encryption verified')) return 200;
+        if (message.includes('hub online')) return 250;
+        if (message.includes('Initializing AI Systems')) return 400;
+        if (message.includes('Running security diagnostics')) return 400;
+        if (message.includes('Port scan') || message.includes('File integrity') || 
+            message.includes('Intrusion detection')) return 300;
+        if (message.includes('BOOT SEQUENCE COMPLETE')) return 600;
+        if (message.includes('LAUNCHING SHRIMP TERMINAL INTERFACE')) return 700;
+        return 120;
+    }
+
+    function displayNextLine() {
+        if (currentLine < bootMessages.length) {
+            const line = document.createElement('div');
+            line.className = 'boot-line';
+            line.innerHTML = bootMessages[currentLine];
+            line.style.animationDelay = '0s';
+            bootScreen.appendChild(line);
+            
+            bootScreen.scrollTop = bootScreen.scrollHeight;
+            
+            currentLine++;
+            
+            const delay = getLineDelay(bootMessages[currentLine - 1]);
+            bootTimeout = setTimeout(displayNextLine, delay);
+        } else {
+            finishBoot();
+        }
+    }
+
+    function finishBoot() {
+        setTimeout(() => {
+            bootScreen.style.display = 'none';
+            skipButton.style.display = 'none';
+            terminal.style.display = 'block';
+            commandInput.focus();
+            initParticles();
+        }, 1000);
+    }
+
+    skipButton.addEventListener('click', () => {
+        clearTimeout(bootTimeout);
+        currentLine = bootMessages.length;
+        finishBoot();
+    });
+
+    function getFPS() {
+        let lastTime = performance.now();
+        let frames = 0;
+        let fps = 60;
+
+        function measureFPS() {
+            frames++;
+            const currentTime = performance.now();
+            if (currentTime >= lastTime + 1000) {
+                fps = Math.round((frames * 1000) / (currentTime - lastTime));
+                frames = 0;
+                lastTime = currentTime;
+            }
+            requestAnimationFrame(measureFPS);
+        }
+        measureFPS();
+
+        return () => fps;
+    }
+
+    const getFPSValue = getFPS();
+
+    function getCurrentTime() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+    }
+
+    function addToLog(command) {
+        const timestamp = getCurrentTime();
+        const logEntry = `[${timestamp}] User executed: ${command}`;
+        commandHistory.push(logEntry);
+        localStorage.setItem('commandHistory', JSON.stringify(commandHistory));
+    }
+
+    function loadHistory() {
+        const saved = localStorage.getItem('commandHistory');
+        if (saved) {
+            commandHistory = JSON.parse(saved);
+        }
+    }
+
+    loadHistory();
+
+    commandInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const command = commandInput.value.trim();
+            if (command) {
+                addToLog(command);
+                executeCommand(command);
+                commandInput.value = '';
+            }
+        }
+    });
+
+    async function executeCommand(cmd) {
+        const output = document.createElement('div');
+        output.className = 'command-output';
+        
+        const commandLine = document.createElement('div');
+        commandLine.className = 'command-line';
+        commandLine.textContent = `chronos@chromeos:~$ ${cmd}`;
+        output.appendChild(commandLine);
+
+        const result = document.createElement('div');
+
+        const cmdLower = cmd.toLowerCase();
+
+        if (cmdLower === 'help') {
+            result.innerHTML = `
+                <span class="status-ok">🦐 Available Commands:</span><br>
+                • help<br>
+                • info<br>
+                • links<br>
+                • status<br>
+                • clear<br>
+                • reboot<br>
+                • userlogs<br>
+                • settings<br>
+                • ai<br>
+                • launchvm
+            `;
+        } else if (cmdLower === 'info') {
+            result.innerHTML = `
+                <div class="settings-panel">
+                    <span class="status-ok">📋 SHRIMP TERMINAL INFO 🦐</span><br><br>
+                    <span class="status-warn">⚠️ IMPORTANT NOTICE ⚠️</span><br><br>
+                    These links may get terminated or blocked by network administrators.<br><br>
+                    <span class="status-ok">📧 Contact Information:</span><br>
+                    • Administrator: Jaren<br>
+                    • Email: ahnefeld-jaren@trojans.k12.mo.us<br><br>
+                    <span class="status-ok">📝 How to Get Updates:</span><br>
+                    • Tell Jaren if links are blocked - he will update them<br>
+                    • Email Jaren to request new features or links<br>
+                    • Check back regularly for the latest working links<br><br>
+                    <span class="status-ok">🦐 About:</span><br>
+                    • Terminal Name: Shrimp Terminal<br>
+                    • Created By: Shrimpy<br>
+                    • Platform: Chrome OS<br>
+                    • Version: 1.0.0<br>
+                    • Last Updated: February 15, 2026<br><br>
+                    This hub provides unblockable access to educational and entertainment resources.
+                </div>
+            `;
+        } else if (cmdLower === 'links') {
+            result.innerHTML = `
+                https://sites.google.com/view/p3tezah<br>
+                https://sites.google.com/view/defeducation<br>
+                https://sites.google.com/view/67isdead<br>
+                https://sites.google.com/view/hellothereio<br>
+                https://sites.google.com/view/areyouhavingfun<br>
+                https://sites.google.com/view/edusite52<br>
+                https://sites.google.com/view/pizzalight<br>
+                https://sites.google.com/view/yeayoucantblockme<br>
+                https://script.google.com/macros/s/AKfycbwpcPUibOlOB1ZjijKuYDOcyZ2l6QphSHTPzxoAjbloaRLfUGRA56JPXYu54dMRy_aTDg/exec<br>
+                https://script.google.com/macros/s/AKfycbwHRqZc_niJ7iWkwufdt6U1hn4-gVZg7pjSMnkacnb1wfjuo5Nt_0dLxiPJg8b_GRjsbQ/exec<br>
+                https://script.google.com/macros/s/AKfycbz_cc5dDckVM0Fkm1xHqgJHPyKvuCJ6aRpnaB5Pms5TqbNqjIr_RzOBx09zyHIxFM-NGw/exec<br>
+                https://script.google.com/macros/s/AKfycbwxGpPscoFJ-wR6i51TntAklR-ztccVk-VqRchqY0zTJfEtixyZVnCcFzxPTyZGmqhHww/exec<br>
+                https://script.google.com/macros/s/AKfycbylysINHc7tVEZE3XJZKklP65tfKlGyUTqi_YhbSMEM_yGqaQYK77s0X0WWfQcM_qzpSQ/exec<br>
+                https://script.google.com/macros/s/AKfycbw_lkH51iNEN6QI9kSlAtxw6H1kWnDNWu7JKBdqFK9Y32pXZ0fRaAkAmKIsc3eXbz6DGw/exec<br>
+                https://script.google.com/macros/s/AKfycbzCs7NtzwmcjAcpGe4TQu_RAVeMDBL6zUSDbZxs2ze8-dLfwRh4DxxhLdxp8t5hD8h04A/exec<br>
+                https://script.google.com/macros/s/AKfycbyrLyfsTUoGzjlh3Tm2MZyONBN6_nLs1uD-nYVlzdTqDwDBKl7s-cfl6LvaHGNSV8fpZg/exec<br>
+                http://script.google.com/macros/s/AKfycbzmdsUj-eNPnb2l4Lcj8xbCvL4QLXOYmKh5m9DOdetNBO2uCsYK_LtI1PHQhH4n7Er1LQ/exec<br>
+                https://script.google.com/macros/s/AKfycbyZbeN77xlGgmRQ2-Z2vAepcu5rtVsZe_9IkR7faG1CLjh01hpIp5eZRxxHIU1d6qd0zw/exec<br>
+                https://spacing.gorich.hk/<br>
+                https://spacing.night.int.yt/<br>
+                https://spacing.is-a.software.cdn.cloudflare.net/<br>
+                https://spacing-is-not.cool.cdn.cloudflare.net/<br>
+                https://dreams.gorich.hk/<br>
+                https://dreams.night.int.yt/<br>
+                https://dreams.is-a.software.cdn.cloudflare.net/<br>
+                https://dreams.is-not.cool.cdn.cloudflare.net/<br>
+                https://learn.about.eclipsecastello.com/<br>
+                https://sites.google.com/view/kamezonev2/kamzone<br>
+                https://sites.google.com/view/kamzone-arcade/kamzone<br>
+                https://spenflix.com<br>
+                https://fmovies.to<br>
+                https://bitcoinex.com<br>
+                https://primex.to<br>
+                https://corsflix.com<br>
+                https://rive.to<br>
+                https://cinegram.to<br>
+                https://shuttletv.net<br>
+                https://1shows.to<br>
+                https://cinevibe.to<br>
+                https://popcornmovies.to<br>
+                https://movish.to<br>
+                https://cinetaro.com<br>
+                https://smashystream.com<br>
+                https://tvids.tv<br>
+                https://tvids.me<br>
+                https://azmovies.net<br>
+                https://bflix.to<br>
+                https://streamm4u.com.co<br>
+                https://m4uhd.tv<br>
+                https://m4ufree.se<br>
+                https://supernova.to<br>
+                https://goojara.ch<br>
+                https://projectfreetv.biz<br>
+                https://hdtoday.tv<br>
+                https://ee3.me
+            `;
+        } else if (cmdLower === 'status') {
+            const fps = getFPSValue();
+            let emoji, status;
+            if (fps < 30) {
+                emoji = '🔴';
+                status = 'Low';
+            } else if (fps < 60) {
+                emoji = '🟠';
+                status = 'Medium';
+            } else {
+                emoji = '🟢';
+                status = 'High';
+            }
+            result.innerHTML = `
+                <span class="status-ok">🦐 System Status Report:</span><br>
+                ${emoji} Site Performance: ${status} (${fps} FPS)<br>
+                💻 Operating System: Chrome OS<br>
+                🔥 All Systems: Operational<br>
+                🌐 Network: Connected<br>
+                🛡️ Security: Maximum<br>
+                🤖 AI Systems: Online
+            `;
+        } else if (cmdLower === 'clear') {
+            outputArea.innerHTML = '';
+            return;
+        } else if (cmdLower === 'reboot') {
+            result.innerHTML = '<span class="status-warn">🔄 Rebooting system...</span>';
+            output.appendChild(result);
+            outputArea.appendChild(output);
+            setTimeout(() => location.reload(), 1500);
+            return;
+        } else if (cmdLower === 'userlogs') {
+            result.innerHTML = '<span class="status-ok">📋 Command History:</span><br>';
+            commandHistory.forEach(log => {
+                result.innerHTML += log + '<br>';
+            });
+        } else if (cmdLower === 'launchvm') {
+            result.innerHTML = `
+                <div class="settings-panel">
+                    <span class="status-warn">🚧 WORK IN PROGRESS 🚧</span><br><br>
+                    Virtual Machine functionality is currently under development.<br>
+                    Check back soon for updates!<br><br>
+                    Contact Jaren at ahnefeld-jaren@trojans.k12.mo.us for more information.
+                </div>
+            `;
+        } else if (cmdLower === 'settings') {
+            result.innerHTML = `
+                <div class="settings-panel">
+                    <div style="color: #ffaa00; font-size: 18px; margin-bottom: 15px;">⚙️ SHRIMP TERMINAL SETTINGS 🦐</div>
+                    
+                    <div class="settings-option">
+                        <label>🎨 Particle Effect:</label>
+                        <button onclick="changeParticleEffect('matrix')">Matrix Rain</button>
+                        <button onclick="changeParticleEffect('particles')">Floating Particles</button>
+                        <button onclick="changeParticleEffect('stars')">Stars</button>
+                        <button onclick="changeParticleEffect('none')">None</button>
+                    </div>
+                    
+                    <div class="settings-option">
+                        <label>🌈 Theme:</label>
+                        <button onclick="applyTheme('orange')">Orange</button>
+                        <button onclick="applyTheme('green')">Green</button>
+                        <button onclick="applyTheme('blue')">Blue</button>
+                        <button onclick="applyTheme('red')">Red</button>
+                        <button onclick="applyTheme('purple')">Purple</button>
+                        <button onclick="applyTheme('cyan')">Cyan</button>
+                        <button onclick="applyTheme('yellow')">Yellow</button>
+                        <button onclick="applyTheme('pink')">Pink</button>
+                        <button onclick="applyTheme('lime')">Lime</button>
+                        <button onclick="applyTheme('white')">White</button>
+                    </div>
+                    
+                    <div class="settings-option">
+                        <label>🖥️ Display:</label>
+                        <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
+                    </div>
+
+                    <div class="settings-option">
+                        <label>🗑️ Data Management:</label>
+                        <button onclick="clearHistory()">Clear Command History</button>
+                        <button onclick="clearAIHistory()">Clear AI Chat History</button>
+                    </div>
+                    
+                    <div style="margin-top: 15px; color: #ff8800;">
+                        📊 Current Settings:<br>
+                        • Particle Effect: ${particleEffect}<br>
+                        • Theme: ${currentTheme}<br>
+                        • Fullscreen: ${document.fullscreenElement ? 'Enabled' : 'Disabled'}<br>
+                        • Command History: ${commandHistory.length} entries<br>
+                        • AI Chat History: ${aiChatHistory.length} messages
+                    </div>
+                </div>
+            `;
+        } else if (cmdLower === 'ai') {
+            result.innerHTML = `
+                <div class="ai-panel">
+                    <div style="color: #ffaa00; font-size: 18px; margin-bottom: 15px;">🤖 AI ASSISTANT PANEL 🦐</div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <span class="status-ok">Available AI Commands:</span><br>
+                        • <span class="status-warn">ai chat [message]</span> - Chat with AI<br>
+                        • <span class="status-warn">ai image [description]</span> - Generate an image<br>
+                        • <span class="status-warn">ai history</span> - View chat history<br>
+                    </div>
+
+                    <div style="color: #00ff88;">
+                        💡 Examples:<br>
+                        • ai chat Hello, how are you?<br>
+                        • ai image A futuristic shrimp in space<br>
+                        • ai history
+                    </div>
+                </div>
+            `;
+        } else if (cmdLower.startsWith('ai chat ')) {
+            const message = cmd.substring(8);
+            result.innerHTML = '<span class="status-warn">🤖 Contacting AI...</span>';
+            output.appendChild(result);
+            outputArea.appendChild(output);
+            terminal.scrollTop = terminal.scrollHeight;
+
+            try {
+                const response = await fetch('https://api.deepai.org/api/text-generator', {
+                    method: 'POST',
+                    headers: {
+                        'api-key': DEEPAI_API_KEY
+                    },
+                    body: new URLSearchParams({
+                        text: message
+                    })
+                });
+
+                const data = await response.json();
+                aiChatHistory.push({ user: message, bot: data.output });
+                
+                result.innerHTML = `
+                    <div class="ai-message ai-user">🧑 You: ${message}</div>
+                    <div class="ai-message ai-bot">🤖 AI: ${data.output}</div>
+                `;
+            } catch (error) {
+                result.innerHTML = '<span style="color: #ff0000;">❌ Error: Failed to connect to AI service.</span>';
+            }
+            return;
+        } else if (cmdLower.startsWith('ai image ')) {
+            const description = cmd.substring(9);
+            result.innerHTML = '<span class="status-warn">🎨 Generating image... This may take a moment...</span>';
+            output.appendChild(result);
+            outputArea.appendChild(output);
+            terminal.scrollTop = terminal.scrollHeight;
+
+            try {
+                const response = await fetch('https://api.deepai.org/api/text2img', {
+                    method: 'POST',
+                    headers: {
+                        'api-key': DEEPAI_API_KEY
+                    },
+                    body: new URLSearchParams({
+                        text: description
+                    })
+                });
+
+                const data = await response.json();
+                
+                result.innerHTML = `
+                    <div class="ai-message ai-user">🧑 Prompt: ${description}</div>
+                    <div class="ai-message ai-bot">
+                        🤖 Generated Image:<br>
+                        <img src="${data.output_url}" class="generated-image" alt="Generated image">
+                        <br><a href="${data.output_url}" target="_blank" style="color: #ff8800;">🔗 Open in new tab</a>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = '<span style="color: #ff0000;">❌ Error: Failed to generate image.</span>';
+            }
+            return;
+        } else if (cmdLower === 'ai history') {
+            result.innerHTML = '<span class="status-ok">💬 AI Chat History:</span><br><br>';
+            if (aiChatHistory.length === 0) {
+                result.innerHTML += '<span class="status-warn">No chat history yet. Start a conversation with "ai chat [message]"</span>';
+            } else {
+                aiChatHistory.forEach((chat, index) => {
+                    result.innerHTML += `
+                        <div class="ai-message ai-user">🧑 [${index + 1}] You: ${chat.user}</div>
+                        <div class="ai-message ai-bot">🤖 AI: ${chat.bot}</div>
+                    `;
+                });
+            }
+        } else {
+            result.innerHTML = `<span style="color: #ff0000;">❌ Error: Command '${cmd}' not found. Type 'help' for available commands.</span>`;
+        }
+
+        output.appendChild(result);
+        outputArea.appendChild(output);
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    window.changeParticleEffect = (effect) => {
+        particleEffect = effect;
+        initParticles();
+    };
+
+    window.applyTheme = applyTheme;
+
+    window.toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
+    window.clearHistory = () => {
+        commandHistory = [];
+        localStorage.removeItem('commandHistory');
+        alert('✅ Command history cleared!');
+    };
+
+    window.clearAIHistory = () => {
+        aiChatHistory = [];
+        alert('✅ AI chat history cleared!');
+    };
+
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particles = [];
+    let animationId;
+
+    function initParticles() {
+        if (animationId) cancelAnimationFrame(animationId);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles = [];
+
+        if (particleEffect === 'matrix') {
+            initMatrix();
+        } else if (particleEffect === 'particles') {
+            initFloatingParticles();
+        } else if (particleEffect === 'stars') {
+            initStars();
+        }
+    }
+
+    function initMatrix() {
+        const columns = Math.floor(canvas.width / 20);
+        for (let i = 0; i < columns; i++) {
+            particles.push({
+                x: i * 20,
+                y: Math.random() * canvas.height,
+                speed: Math.random() * 3 + 2
+            });
+        }
+        animateMatrix();
+    }
+
+    function animateMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#ff8800';
+        ctx.font = '15px monospace';
+        
+        particles.forEach(p => {
+            const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+            ctx.fillText(char, p.x, p.y);
+            
+            p.y += p.speed;
+            if (p.y > canvas.height) {
+                p.y = 0;
+            }
+        });
+        
+        animationId = requestAnimationFrame(animateMatrix);
+    }
+
+    function initFloatingParticles() {
+        for (let i = 0; i < 100; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                size: Math.random() * 3 + 1
+            });
+        }
+        animateFloatingParticles();
+    }
+
+    function animateFloatingParticles() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#ff8800';
+        
+        particles.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            p.x += p.vx;
+            p.y += p.vy;
+            
+            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        });
+        
+        animationId = requestAnimationFrame(animateFloatingParticles);
+    }
+
+    function initStars() {
+        for (let i = 0; i < 200; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2,
+                opacity: Math.random()
+            });
+        }
+        animateStars();
+    }
+
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach(p => {
+            ctx.fillStyle = `rgba(255, 136, 0, ${p.opacity})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            p.opacity += (Math.random() - 0.5) * 0.1;
+            if (p.opacity < 0) p.opacity = 0;
+            if (p.opacity > 1) p.opacity = 1;
+        });
+        
+        animationId = requestAnimationFrame(animateStars);
+    }
+
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initParticles();
+    });
+
+    window.onload = () => {
+        setTimeout(displayNextLine, 500);
+    };
+</script>
+
+</body>
+</html>
