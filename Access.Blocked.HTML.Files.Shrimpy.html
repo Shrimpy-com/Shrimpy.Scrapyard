@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Access.Blocked.HTML.Files.Shrimpy</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: radial-gradient(circle at top, #0b0f1a, #05070c);
+      overflow: hidden;
+      color: white;
+    }
+
+    /* floating glow */
+    .glow {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: #00ffee;
+      filter: blur(140px);
+      opacity: 0.25;
+      animation: float 12s ease-in-out infinite alternate;
+    }
+
+    .glow.two {
+      background: #7c7cff;
+      top: 60%;
+      left: 60%;
+      animation-delay: 2s;
+    }
+
+    @keyframes float {
+      from { transform: translateY(-40px) translateX(-40px); }
+      to   { transform: translateY(40px) translateX(40px); }
+    }
+
+    /* container */
+    .container {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      width: 420px;
+      padding: 28px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+      animation: cardIn 1.2s cubic-bezier(.16,1,.3,1);
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: scale(0.9) translateY(40px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    h1 {
+      font-size: 26px;
+      text-align: center;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #00ffee, #7c7cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sub {
+      text-align: center;
+      font-size: 13px;
+      opacity: 0.7;
+      margin-bottom: 22px;
+    }
+
+    .step {
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: stepIn 0.6s forwards;
+    }
+
+    .step:nth-child(1) { animation-delay: .2s; }
+    .step:nth-child(2) { animation-delay: .4s; }
+    .step:nth-child(3) { animation-delay: .6s; }
+    .step:nth-child(4) { animation-delay: .8s; }
+    .step:nth-child(5) { animation-delay: 1s; }
+    .step:nth-child(6) { animation-delay: 1.2s; }
+
+    @keyframes stepIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .num {
+      min-width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: bold;
+      background: linear-gradient(135deg, #00ffee, #7c7cff);
+      color: black;
+    }
+
+    .footer {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+
+    .warning {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255,0,0,0.1);
+      color: #ff9a9a;
+      font-size: 12px;
+      text-align: center;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="glow"></div>
+  <div class="glow two"></div>
+
+  <div class="container">
+    <div class="card">
+      <h1>Bully Mih Rotun</h1>
+      <div class="sub">Access.Blocked.HTML.Files.Shrimpy • by shrimpy</div>
+
+      <div class="step"><div class="num">1</div>Download the HTML file</div>
+      <div class="step"><div class="num">2</div>Open Settings</div>
+      <div class="step"><div class="num">3</div>Search "android" → Android Preferences</div>
+      <div class="step"><div class="num">4</div>Open Android Settings</div>
+      <div class="step"><div class="num">5</div>Storage → Documents → find your file</div>
+      <div class="step"><div class="num">6</div>Right click → Open with → Chrome or HTML Viewer</div>
+
+      <div class="warning">⚠ HTML Viewer is VERY SLOW ⚠</div>
+
+      <div class="footer">method by <b>Shrimpy</b></div>
+    </div>
+  </div>
+
+</body>
+</html>
