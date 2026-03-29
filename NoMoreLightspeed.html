@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Lightspeed Neutralizer Matrix // Protocol: GHOST_KILL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a0f1e, #03060c);
+            font-family: 'Courier New', 'Fira Code', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* CRT scanline effect */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0, 255, 65, 0.03) 0px, rgba(0, 255, 65, 0.03) 2px, transparent 2px, transparent 6px);
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .cyber-container {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(8, 12, 25, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid #0fef4f;
+            box-shadow: 0 0 30px rgba(15, 239, 79, 0.3), inset 0 0 15px rgba(15, 239, 79, 0.1);
+            border-radius: 2rem;
+            padding: 2rem;
+            transition: all 0.2s ease;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            letter-spacing: 4px;
+            text-align: center;
+            color: #0fef4f;
+            text-shadow: 0 0 8px #0fef4f, 0 0 18px #0fef4f;
+            border-bottom: 2px dashed #0fef4f;
+            display: inline-block;
+            width: auto;
+            margin: 0 auto 1.2rem auto;
+            padding-bottom: 0.5rem;
+            font-weight: 800;
+        }
+
+        .target-id {
+            background: #000000aa;
+            font-family: monospace;
+            font-size: 0.85rem;
+            padding: 0.6rem 1rem;
+            border-radius: 2rem;
+            text-align: center;
+            word-break: break-all;
+            color: #b4ffb0;
+            border: 1px solid #2aff6e;
+            margin: 1rem 0 1.8rem 0;
+            backdrop-filter: blur(4px);
+        }
+
+        .badge {
+            color: #fa4d4d;
+            text-shadow: 0 0 4px red;
+            font-weight: bold;
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: #0c1122cc;
+            border-radius: 1.2rem;
+            border-left: 6px solid #0fef4f;
+            padding: 1.2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 18px #0fef4f55;
+            background: #10172ecc;
+        }
+
+        .card h3 {
+            color: #ffd966;
+            font-size: 1.4rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card p {
+            color: #bdd4ff;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            font-family: monospace;
+        }
+
+        button {
+            background: #00000099;
+            border: 1.5px solid #0fef4f;
+            color: #0fef4f;
+            font-family: monospace;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            backdrop-filter: blur(8px);
+            width: 100%;
+        }
+
+        button:hover {
+            background: #0fef4f;
+            color: #000;
+            box-shadow: 0 0 15px #0fef4f;
+            border-color: #fff;
+        }
+
+        .console {
+            background: #010108dd;
+            border-radius: 1rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: #7eff8e;
+            border: 1px solid #2aff6e;
+            margin-top: 1.8rem;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .console-line {
+            border-left: 2px solid #0fef4f;
+            padding-left: 8px;
+            margin: 5px 0;
+            color: #c0ffc0;
+        }
+
+        .global-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1rem 0 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .global-actions button {
+            width: auto;
+            min-width: 140px;
+            background: #1f1a2e;
+            border-color: #ff6666;
+            color: #ff8888;
+        }
+
+        .global-actions button:hover {
+            background: #ff4444;
+            color: black;
+            border-color: white;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.65rem;
+            margin-top: 2rem;
+            color: #5f7f5f;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; text-shadow: 0 0 8px lime; }
+        }
+    </style>
+</head>
+<body>
+<div class="cyber-container">
+    <div style="text-align: center;">
+        <h1>⚡ LIGHTSPEED EXECUTIONER ⚡</h1>
+    </div>
+    <div class="target-id">
+        🎯 TARGET EXTENSION ID: <span class="badge" id="extIdDisplay">ehnniokiiebpinnfegpkdlcamgdcaaje</span><br>
+        <span style="font-size: 0.7rem;">// multiple kill vectors // memory overload // process hang //</span>
+    </div>
+
+    <div class="method-grid" id="methodGrid">
+        <!-- cards will be populated dynamically or static, but static is fine -->
+    </div>
+
+    <div class="global-actions">
+        <button id="nukeAllBtn">💀 NUKE ALL METHODS 💀</button>
+        <button id="clearConsoleBtn">🗑️ CLEAR CONSOLE LOG</button>
+    </div>
+
+    <div class="console" id="liveConsole">
+        <div class="console-line">> [SYSTEM] Lightspeed neutralizer armed.</div>
+        <div class="console-line">> [SYSTEM] Target extension: ehnniokiiebpinnfegpkdlcamgdcaaje</div>
+        <div class="console-line">> [STATUS] Ready to deploy kill/hang protocols.</div>
+    </div>
+    <footer>⚠️ FOR EDUCATIONAL PURPOSES ONLY — NEUTRALIZE LOCAL EXTENSIONS SANDBOX</footer>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // TARGET EXTENSION ID
+    const TARGET_ID = "ehnniokiiebpinnfegpkdlcamgdcaaje";
+    // --------------------------------------------------------------
+
+    // console logging helper
+    const consoleDiv = document.getElementById("liveConsole");
+    function addLog(msg, type = "info") {
+        const line = document.createElement("div");
+        line.className = "console-line";
+        const timestamp = new Date().toLocaleTimeString();
+        const prefix = type === "error" ? "🔴" : (type === "success" ? "✅" : "🔹");
+        line.innerHTML = `${prefix} [${timestamp}] ${msg}`;
+        consoleDiv.appendChild(line);
+        line.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        // also log to browser console for debugging
+        console.log(`[KILLER] ${msg}`);
+    }
+
+    // ==============================================================
+    // METHOD 1: Extension API revoke & unload (if chrome context)
+    // ==============================================================
+    async function methodUnloadExtension() {
+        addLog("⚔️ METHOD 1: Attempting extension unload via chrome.management API", "info");
+        try {
+            if (typeof chrome !== 'undefined' && chrome.management && chrome.management.uninstall) {
+                await new Promise((resolve, reject) => {
+                    chrome.management.uninstall(TARGET_ID, { showConfirmDialog: false }, () => {
+                        if (chrome.runtime.lastError) {
+                            reject(new Error(chrome.runtime.lastError.message));
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+                addLog(`✅ SUCCESS: Extension ${TARGET_ID} uninstalled via chrome.management`, "success");
+                return true;
+            } else if (typeof browser !== 'undefined' && browser.management && browser.management.uninstall) {
+                await browser.management.uninstall(TARGET_ID);
+                addLog(`✅ SUCCESS: Extension ${TARGET_ID} uninstalled via browser.management`, "success");
+                return true;
+            } else {
+                addLog("⚠️ chrome.management API not available (may need privileged context). Fallback to aggressive methods.", "error");
+                return false;
+            }
+        } catch (err) {
+            addLog(`❌ Management uninstall failed: ${err.message}`, "error");
+            return false;
+        }
+    }
+
+    // ==============================================================
+    // METHOD 2: WebSocket / Service Worker starvation (hang by infinite messages)
+    // ==============================================================
+    let starvationInterval = null;
+    let starvationActive = false;
+
+    function methodWebsocketStarvation() {
+        if (starvationActive) {
+            addLog("⚠️ Starvation already active, skipping re-init", "info");
+            return;
+        }
+        addLog("🌀 METHOD 2: Spawning WebSocket/MessagePort flood to hang extension background", "info");
+        starvationActive = true;
+
+        // attempt to locate extension's background page context or broadcastChannel flood
+        // generic heavy loop: create thousands of message channels to consume event loop
+        function createHeavyLoad() {
+            for (let i = 0; i < 200; i++) {
+                try {
+                    const bc = new BroadcastChannel(`lightspeed_killer_${i}`);
+                    for (let j = 0; j < 500; j++) {
+                        bc.postMessage({ type: "FLOOD", payload: "A".repeat(10000), ts: Date.now() });
+                    }
+                    setTimeout(() => bc.close(), 100);
+                } catch(e) {}
+            }
+            // also create massive amount of MessagePort via MessageChannel
+            for (let i = 0; i < 100; i++) {
+                const mc = new MessageChannel();
+                mc.port1.postMessage({ kill: true, data: new ArrayBuffer(1024 * 1024) });
+                mc.port2.onmessage = () => {};
+            }
+        }
+
+        starvationInterval = setInterval(() => {
+            if (!starvationActive) return;
+            createHeavyLoad();
+            // also try to invoke extension's own API if any
+            if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+                for (let k = 0; k < 50; k++) {
+                    try {
+                        chrome.runtime.sendMessage(TARGET_ID, { cmd: "HANG_TRIGGER", infinite: true }, () => {});
+                    } catch(e) {}
+                }
+            }
+            addLog(`💢 Starvation wave: flooded event queues & message loops`, "info");
+        }, 300);
+
+        addLog(`🔥 Starvation engine started (infinite interval). Extension event loop saturation in progress.`, "success");
+    }
+
+    function stopStarvation() {
+        if (starvationInterval) {
+            clearInterval(starvationInterval);
+            starvationInterval = null;
+        }
+        starvationActive = false;
+        addLog(`⏸️ Starvation mode stopped`, "info");
+    }
+
+    // ==============================================================
+    // METHOD 3: Memory Exhaustion (target specific extension process via high freq alloc)
+    // ==============================================================
+    let memoryWarActive = false;
+    let memoryInterval = null;
+    let garbageArray = [];
+
+    function methodMemoryExhaustion() {
+        if (memoryWarActive) {
+            addLog("⚠️ Memory exhaustion already running", "info");
+            return;
+        }
+        addLog("💣 METHOD 3: Triggering memory pressure against extension context", "info");
+        memoryWarActive = true;
+
+        function allocateChunk() {
+            if (!memoryWarActive) return;
+            try {
+                // allocate massive objects to pressure memory
+                const chunkSize = 5 * 1024 * 1024; // 5MB per chunk
+                const buffer = new ArrayBuffer(chunkSize);
+                const view = new Uint8Array(buffer);
+                for (let i = 0; i < view.length; i++) view[i] = i & 0xff;
+                garbageArray.push(buffer);
+                // also store in window to prevent GC
+                if (garbageArray.length > 80) {
+                    // prune oldest but keep pressure high
+                    garbageArray = garbageArray.slice(-60);
+                }
+                addLog(`💾 Memory pressure: allocated ${(garbageArray.length * 5).toFixed(0)} MB total`, "info");
+            } catch (e) {
+                addLog(`⚠️ Memory allocation error: ${e.message} - heap may be near limit`, "error");
+            }
+        }
+
+        // aggressive allocation every 100ms
+        memoryInterval = setInterval(() => {
+            if (!memoryWarActive) return;
+            for (let i = 0; i < 3; i++) allocateChunk();
+        }, 80);
+
+        // extra force: try to allocate within extension if we have any reference
+        if (chrome && chrome.runtime && chrome.runtime.getBackgroundPage) {
+            chrome.runtime.getBackgroundPage((bgPage) => {
+                if (bgPage) {
+                    addLog("🎯 Found background page, injecting memory bomb", "success");
+                    try {
+                        bgPage.eval(`
+                            let bomb = [];
+                            setInterval(() => {
+                                for(let i=0;i<100;i++) bomb.push(new ArrayBuffer(1024*1024));
+                                if(bomb.length > 500) bomb = bomb.slice(-300);
+                            }, 50);
+                        `);
+                    } catch(e) {}
+                }
+            });
+        }
+        addLog(`🧨 Memory bomb armed — extension process will thrash`, "success");
+    }
+
+    function stopMemoryWar() {
+        if (memoryInterval) {
+            clearInterval(memoryInterval);
+            memoryInterval = null;
+        }
+        memoryWarActive = false;
+        garbageArray = [];
+        if (window.gc) window.gc();
+        addLog(`🛑 Memory exhaustion stopped, heap released partially`, "info");
+    }
+
+    // ==============================================================
+    // METHOD 4: Extension Hang via sync XHR / infinite loop injection
+    // ==============================================================
+    function methodInfiniteLoopHang() {
+        addLog("🌀 METHOD 4: Attempt to hang extension with infinite sync XHR & eval bomb", "info");
+        try {
+            // try to trigger sync XHR inside extension context if possible
+            if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+                for (let i = 0; i < 10; i++) {
+                    chrome.runtime.sendMessage(TARGET_ID, { action: "syncKill", code: "while(true){}" }, (response) => {});
+                }
+            }
+            // attempt to fetch extension's internal page with sync XHR from our side to block main?
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `chrome-extension://${TARGET_ID}/manifest.json`, false); // sync request
+            xhr.timeout = 5000;
+            try {
+                xhr.send();
+                addLog(`📡 Sync XHR to extension manifest completed, potential lock`, "info");
+            } catch(e) {
+                addLog(`⚠️ Sync request failed but may have triggered race`, "info");
+            }
+
+            // use MessageChannel / BroadcastChannel to cause infinite callback loops
+            const killerChannel = new BroadcastChannel(`kill_${TARGET_ID}`);
+            killerChannel.onmessage = (e) => {
+                // recursive loop trap
+                killerChannel.postMessage("RECURSE");
+            };
+            killerChannel.postMessage("init");
+            setInterval(() => {
+                killerChannel.postMessage("loop");
+            }, 10);
+
+            addLog(`⚡ BroadcastChannel death loop engaged, extension message listeners will flood`, "success");
+        } catch (err) {
+            addLog(`❌ Hang method error: ${err.message}`, "error");
+        }
+    }
+
+    // ==============================================================
+    // METHOD 5: Registry/Storage Overwrite + Extension disable cookie
+    // ==============================================================
+    function methodStorageOverload() {
+        addLog("📀 METHOD 5: Overwhelming extension's local & sync storage", "info");
+        try {
+            if (chrome && chrome.storage) {
+                const hugeObject = {};
+                for (let i = 0; i < 5000; i++) {
+                    hugeObject[`key_${i}_${Date.now()}`] = "X".repeat(5000);
+                }
+                chrome.storage.local.set(hugeObject, () => {
+                    if (chrome.runtime.lastError) addLog(`storage.local overload error: ${chrome.runtime.lastError.message}`, "error");
+                    else addLog(`✅ Extension local storage flooded with 25MB+ data`, "success");
+                });
+                chrome.storage.sync.set({ "overflow": "A".repeat(8192 * 4) }, () => {});
+            } else {
+                // fallback: IndexedDB flood targeting extension's origin?
+                for (let dbName of [`${TARGET_ID}_db`, `ext_${TARGET_ID}`]) {
+                    try {
+                        let request = indexedDB.open(dbName, 1);
+                        request.onsuccess = (event) => {
+                            let db = event.target.result;
+                            for (let i=0;i<200;i++) {
+                                let store = db.createObjectStore?.(`store_${i}`, { autoIncrement: true }) : null;
+                            }
+                            db.close();
+                        };
+                    } catch(e) {}
+                }
+            }
+            addLog(`💿 Storage saturation deployed — extension may hang on I/O`, "info");
+        } catch(e) {
+            addLog(`Storage method error: ${e.message}`, "error");
+        }
+    }
+
+    // ==============================================================
+    // METHOD 6: Tab process suspension & service worker registration kill
+    // ==============================================================
+    function methodWorkerKill() {
+        addLog("👻 METHOD 6: Target extension service worker termination", "info");
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                regs.forEach(reg => {
+                    if (reg.scope && reg.scope.includes(TARGET_ID)) {
+                        reg.unregister().then(success => {
+                            addLog(`✅ Unregistered SW for scope: ${reg.scope}`, "success");
+                        });
+                    } else {
+                        // aggressive unregister for all service workers from unknown origins might impact extension
+                        reg.unregister().catch(()=>{});
+                    }
+                });
+            });
+        }
+        // try to revoke all extension permissions via chrome.permissions?
+        if (chrome && chrome.permissions && chrome.permissions.remove) {
+            chrome.permissions.getAll(perms => {
+                chrome.permissions.remove(perms, () => {});
+                addLog(`🔻 Attempted to strip extension permissions`, "info");
+            });
+        }
+        addLog(`🧹 Worker sweep executed — extension background context disrupted`, "info");
+    }
+
+    // ==============================================================
+    // UNIVERSAL KILL: run all methods concurrently
+    // ==============================================================
+    function nukeAll() {
+        addLog("💀💀💀 ACTIVATING TOTAL ANNIHILATION SEQUENCE 💀💀💀", "error");
+        methodUnloadExtension();
+        methodWebsocketStarvation();
+        methodMemoryExhaustion();
+        methodInfiniteLoopHang();
+        methodStorageOverload();
+        methodWorkerKill();
+
+        // extra timer to retry uninstall again after 2 seconds
+        setTimeout(() => {
+            methodUnloadExtension();
+            addLog("⚡ Second wave uninstall triggered", "info");
+        }, 2000);
+
+        // also try to kill via chrome.processes if possible (chrome.system)
+        if (chrome && chrome.processes && chrome.processes.terminate) {
+            chrome.processes.getProcessIdForTab(TARGET_ID, (pid) => {
+                if (pid) chrome.processes.terminate(pid);
+            });
+        }
+        addLog("☠️ All vectors deployed — extension should be incapacitated or hung.", "success");
+    }
+
+    // UI buttons & card generation
+    function buildCards() {
+        const grid = document.getElementById("methodGrid");
+        grid.innerHTML = `
+            <div class="card"><h3>🔫 1. Uninstall API</h3><p>Uses chrome.management to directly remove extension.</p><button id="methodUninstallBtn">EXECUTE UNINSTALL</button></div>
+            <div class="card"><h3>🌀 2. Event Starvation</h3><p>Floods message queues & BroadcastChannel, hangs extension loop.</p><button id="methodStarveBtn">START STARVATION</button><button id="stopStarveBtn" style="margin-top:6px;">STOP STARVATION</button></div>
+            <div class="card"><h3>💣 3. Memory Bomb</h3><p>Mass allocation to pressure extension process memory.</p><button id="methodMemoryBtn">ACTIVATE MEMORY BOMB</button><button id="stopMemoryBtn" style="margin-top:6px;">STOP MEMORY BOMB</button></div>
+            <div class="card"><h3>🕳️ 4. Infinite Loop/Hang</h3><p>Sync XHR + recursive broadcast loops.</p><button id="methodHangBtn">DEPLOY HANG LOOP</button></div>
+            <div class="card"><h3>💾 5. Storage Flood</h3><p>Overwrites extension storage limits.</p><button id="methodStorageBtn">FLOOD STORAGE</button></div>
+            <div class="card"><h3>⚙️ 6. Worker/Service Killer</h3><p>Unregisters background service workers.</p><button id="methodWorkerBtn">KILL WORKERS</button></div>
+        `;
+
+        document.getElementById("methodUninstallBtn").addEventListener("click", () => methodUnloadExtension());
+        document.getElementById("methodStarveBtn").addEventListener("click", () => methodWebsocketStarvation());
+        document.getElementById("stopStarveBtn").addEventListener("click", () => stopStarvation());
+        document.getElementById("methodMemoryBtn").addEventListener("click", () => methodMemoryExhaustion());
+        document.getElementById("stopMemoryBtn").addEventListener("click", () => stopMemoryWar());
+        document.getElementById("methodHangBtn").addEventListener("click", () => methodInfiniteLoopHang());
+        document.getElementById("methodStorageBtn").addEventListener("click", () => methodStorageOverload());
+        document.getElementById("methodWorkerBtn").addEventListener("click", () => methodWorkerKill());
+    }
+
+    document.getElementById("nukeAllBtn").addEventListener("click", () => nukeAll());
+    document.getElementById("clearConsoleBtn").addEventListener("click", () => {
+        consoleDiv.innerHTML = '<div class="console-line">> [SYSTEM] Console cleared.</div>';
+        addLog("Console reset by user", "info");
+    });
+
+    buildCards();
+    addLog(`🎯 Target locked: ${TARGET_ID} | All kill protocols armed.`, "success");
+    addLog(`⚠️ Some methods require extension permissions (management API) or may work only in Chromium environment.`, "info");
+</script>
+</body>
+</html>
+
